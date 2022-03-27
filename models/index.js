@@ -5,6 +5,7 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const configDB = require("../config/db");
+const { consumerPlans, developerPlans } = require("../config/plans");
 const db = {};
 
 let sequelize = new Sequelize(process.env["DATABASE_URL"], {
@@ -31,8 +32,25 @@ async function syncDatabase() {
   await sequelize.sync({ alter: true });
 }
 
+async function populateInitialPlans() {
+  let promisesConsumer = consumerPlans.map(async (consumerPlan) => {
+    await db["ConsumerPlan"].create(consumerPlan);
+  });
+
+  const resultsConsumer = await Promise.all(promisesConsumer);
+  console.log(resultsConsumer);
+
+  let promisesDeveloper = developerPlans.map(async (developerPlan) => {
+    await db["DeveloperPlan"].create(developerPlan);
+  });
+
+  const resultsDeveloper = await Promise.all(promisesDeveloper);
+  console.log(resultsDeveloper);
+}
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 db.sync = syncDatabase;
+db.populateInitialPlans = populateInitialPlans;
 
 module.exports = db;
