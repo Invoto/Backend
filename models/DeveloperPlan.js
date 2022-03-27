@@ -1,8 +1,9 @@
-import { DataTypes, Model } from '@sequelize/core';
+'use strict';
+const {
+    Model
+} = require('sequelize');
 
-module.exports = (sequelize) => {
-    const DeveloperProfile = require("./DeveloperProfile")(sequelize);
-
+module.exports = (sequelize, DataTypes) => {
     class DeveloperPlan extends Model { }
 
     DeveloperPlan.init({
@@ -16,7 +17,9 @@ module.exports = (sequelize) => {
     });
 
     /* Relationships */
-    DeveloperPlan.hasMany(DeveloperProfile);
+    DeveloperPlan.associate = function (models) {
+        DeveloperPlan.hasMany(models.DeveloperProfile);
+    }
 
     return DeveloperPlan;
 };

@@ -1,8 +1,9 @@
-import { DataTypes, Model } from '@sequelize/core';
+'use strict';
+const {
+    Model
+} = require('sequelize');
 
-module.exports = (sequelize) => {
-    const User = require("./User")(sequelize);
-
+module.exports = (sequelize, DataTypes) => {
     class VolunteeredDocument extends Model { }
 
     VolunteeredDocument.init({
@@ -23,7 +24,9 @@ module.exports = (sequelize) => {
     });
 
     /* Relationships */
-    VolunteeredDocument.belongsTo(User); // Optional
+    VolunteeredDocument.associate = function (models) {
+        VolunteeredDocument.belongsTo(models.User); // Optional Participation
+    }
 
     return VolunteeredDocument;
 };

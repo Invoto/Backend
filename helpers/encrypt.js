@@ -12,4 +12,4 @@ function hashPassword(user) {
     }
 }
 
-export { hashPassword };
+module.exports = { hashPassword };

@@ -1,10 +1,10 @@
-import { DataTypes, Model } from '@sequelize/core';
-import generateApiKey from 'generate-api-key';
+'use strict';
+const {
+    Model
+} = require('sequelize');
+const generateApiKey = require('generate-api-key');
 
-module.exports = (sequelize) => {
-    const User = require("./User")(sequelize);
-    const DeveloperPlan = require("./DeveloperPlan")(sequelize);
-
+module.exports = (sequelize, DataTypes) => {
     class DeveloperProfile extends Model { }
 
     DeveloperProfile.init({
@@ -23,18 +23,20 @@ module.exports = (sequelize) => {
     });
 
     /* Relationships */
-    DeveloperProfile.belongsTo(User, {
-        // Mandatory to have a User Profile.
-        foreignKey: {
-            allowNull: false,
-        }
-    });
-    DeveloperProfile.belongsTo(DeveloperPlan, {
-        // Mandatory to have a Developer Plan.
-        foreignKey: {
-            allowNull: false,
-        }
-    });
+    DeveloperProfile.associate = function (models) {
+        DeveloperProfile.belongsTo(models.User, {
+            // Mandatory to have a User Profile.
+            foreignKey: {
+                allowNull: false,
+            }
+        });
+        DeveloperProfile.belongsTo(models.DeveloperPlan, {
+            // Mandatory to have a Developer Plan.
+            foreignKey: {
+                allowNull: false,
+            }
+        });
+    }
 
     return DeveloperProfile;
 };

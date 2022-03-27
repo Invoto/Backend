@@ -1,8 +1,9 @@
-import { DataTypes, Model } from '@sequelize/core';
+'use strict';
+const {
+    Model
+} = require('sequelize');
 
-module.exports = (sequelize) => {
-    const User = require("./User")(sequelize);
-
+module.exports = (sequelize, DataTypes) => {
     class Extraction extends Model { }
 
     Extraction.init({
@@ -20,7 +21,9 @@ module.exports = (sequelize) => {
     });
 
     /* Relationships */
-    Extraction.belongsTo(User); // Optional
+    Extraction.associate = function (models) {
+        Extraction.belongsTo(models.User); // Optional Participation
+    }
 
     return Extraction;
 };
