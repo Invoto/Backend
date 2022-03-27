@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     ConsumerProfile.init({
         usedQuota: {
             type: DataTypes.INTEGER,
+            defaultValue: 0,
         }
     }, {
         sequelize,

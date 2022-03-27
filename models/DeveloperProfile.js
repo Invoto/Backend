@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         usageQuota: {
             type: DataTypes.INTEGER,
+            defaultValue: 0,
         }
     }, {
         sequelize,
