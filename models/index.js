@@ -38,14 +38,12 @@ async function populateInitialPlans() {
   });
 
   const resultsConsumer = await Promise.all(promisesConsumer);
-  console.log(resultsConsumer);
 
   let promisesDeveloper = developerPlans.map(async (developerPlan) => {
     await db["DeveloperPlan"].create(developerPlan);
   });
 
   const resultsDeveloper = await Promise.all(promisesDeveloper);
-  console.log(resultsDeveloper);
 }
 
 db.sequelize = sequelize;
