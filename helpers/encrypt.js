@@ -13,4 +13,18 @@ function hashPassword(user) {
     }
 }
 
-module.exports = { hashPassword };
+function comparePassword(plainTextPassword, hashedPassword, onSuccess, onFailure) {
+    bcrypt.compare(plainTextPassword, hashedPassword, function (err, result) {
+        if (result) {
+            onSuccess();
+        }
+        else {
+            onFailure(err);
+        }
+    });
+}
+
+module.exports = {
+    hashPassword,
+    comparePassword,
+};
