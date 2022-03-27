@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 
 function hashPassword(user) {
     if (user === null) {
