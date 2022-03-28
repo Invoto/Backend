@@ -6,6 +6,7 @@ const configCORS = require("../config/cors");
 const routerWeb = require("./web");
 const routerAPI = require("./api");
 
+// CORS Whitelisting.
 router.use((req, res, next) => {
     for (const [headerKey, headerValue] of Object.entries(configCORS.RESPONSE_HEADERS)) {
         res.setHeader(headerKey, headerValue);
