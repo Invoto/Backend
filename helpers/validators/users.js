@@ -5,6 +5,10 @@ const schemaLogin = Joi.object({
     password: Joi.string().min(3).max(15).required(),
 });
 
+const schemaForgot = Joi.object({
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
+});
+
 const schemaRegister = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
@@ -16,6 +20,19 @@ function isLoginDataValid(email, password) {
     let result = schemaLogin.validate({
         email: email,
         password: password,
+    });
+
+    if (!result.error) {
+        return [!result.error, ""];
+    }
+    else {
+        return [!result.error, result.error["message"]];
+    }
+}
+
+function isForgotValid(email) {
+    let result = schemaForgot.validate({
+        email: email,
     });
 
     if (!result.error) {
@@ -44,5 +61,6 @@ function isRegisterDataValid(name, email, password, passwordRepeat) {
 
 module.exports = {
     isLoginDataValid,
+    isForgotValid,
     isRegisterDataValid,
 };

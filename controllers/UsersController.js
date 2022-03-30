@@ -1,8 +1,10 @@
-const { isLoginDataValid, isRegisterDataValid } = require("../helpers/validators/users");
+const { isLoginDataValid, isForgotValid, isRegisterDataValid } = require("../helpers/validators/users");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
 const { comparePassword } = require("../helpers/encrypt");
 const { generateTokenForUser } = require("../helpers/tokens");
+const { generatePassword } = require("../helpers/passwords");
+const { sendEmail } = require("../helpers/emails");
 
 const { DataTypes } = require("sequelize");
 const db = require("../models");
@@ -22,7 +24,7 @@ async function loginUser(req, res) {
 
         if (users.length == 0) {
             res.status(ResponseStatusCodes.NOT_FOUND).json(getFailureResponse({
-                message: "No User Found",
+                message: "No Such User Found",
             }));
         }
         else {
@@ -36,7 +38,51 @@ async function loginUser(req, res) {
                 res.json(getFailureResponse({
                     message: "Incorrect Password",
                 }));
-            })
+            });
+        }
+    }
+    else {
+        res.status(ResponseStatusCodes.VALIDATION_ERROR).json(getFailureResponse({
+            message: validationResponse[1],
+        }));
+    }
+}
+
+async function forgotPassword(req, res) {
+    let email = req.body.email;
+
+    let validationResponse = isForgotValid(email);
+    if (validationResponse[0]) {
+        const users = await User.findAll({
+            where: {
+                email: email,
+            },
+        });
+
+        if (users.length == 0) {
+            res.status(ResponseStatusCodes.NOT_FOUND).json(getFailureResponse({
+                message: "No Such User Found",
+            }));
+        }
+        else {
+            const user = users[0];
+
+            let newPassword = generatePassword();
+            user.set({
+                password: newPassword,
+            });
+
+            await user.save();
+
+            let emailBody = "You've requested a password reset in Invoto. Please use the following password to login the next time.\nPassword: " + newPassword + "\n";
+            let emailHTMLBody = "<p>" + emailBody + "</p>";
+            sendEmail("noreply@invoto.ml", email, "Password Reset Request", emailBody, emailHTMLBody, () => {
+                res.json(getSuccessResponse({}));
+            }, (error) => {
+                res.json(getFailureResponse({
+                    message: error
+                }));
+            });
         }
     }
     else {
@@ -90,5 +136,6 @@ async function registerUser(req, res) {
 
 module.exports = {
     loginUser,
+    forgotPassword,
     registerUser,
 };

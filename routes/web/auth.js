@@ -7,6 +7,10 @@ router.post("/login", function (req, res, next) {
     controllerUsers.loginUser(req, res);
 });
 
+router.post("/forgot", function (req, res, next) {
+    controllerUsers.forgotPassword(req, res);
+});
+
 router.post("/register", function (req, res, next) {
     controllerUsers.registerUser(req, res);
 });
