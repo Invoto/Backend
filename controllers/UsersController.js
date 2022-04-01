@@ -10,6 +10,10 @@ const { DataTypes } = require("sequelize");
 const db = require("../models");
 const User = require("../models/User")(db.sequelize, DataTypes);
 
+async function isAuth(req, res) {
+    res.json(getSuccessResponse({}));
+}
+
 async function loginUser(req, res) {
     let email = req.body.email;
     let password = req.body.password;
@@ -42,7 +46,7 @@ async function loginUser(req, res) {
         }
     }
     else {
-        res.status(ResponseStatusCodes.VALIDATION_ERROR).json(getFailureResponse({
+        res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
             message: validationResponse[1],
         }));
     }
@@ -86,7 +90,7 @@ async function forgotPassword(req, res) {
         }
     }
     else {
-        res.status(ResponseStatusCodes.VALIDATION_ERROR).json(getFailureResponse({
+        res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
             message: validationResponse[1],
         }));
     }
@@ -128,13 +132,14 @@ async function registerUser(req, res) {
         }
     }
     else {
-        res.status(ResponseStatusCodes.VALIDATION_ERROR).json(getFailureResponse({
+        res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
             message: validationResponse[1],
         }));
     }
 }
 
 module.exports = {
+    isAuth,
     loginUser,
     forgotPassword,
     registerUser,
