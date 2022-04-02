@@ -7,10 +7,11 @@ const db = require("../models");
 const User = require("../models/User")(db.sequelize, DataTypes);
 
 function CheckRequestAuthed(req, res, next) {
-    let authHeader = req.headers["Authorization"];
+    let authHeader = req.headers["authorization"];
 
     if (authHeader) {
         let authToken = authHeader.split(" ")[1];
+        console.log(authToken);
 
         if (authToken) {
             verifyToken(authToken, (user) => {
@@ -30,7 +31,7 @@ function CheckRequestAuthed(req, res, next) {
     }
     else {
         res.status(ResponseStatusCodes.BAD_REQUEST).send(getFailureResponse({
-            message: "No Authoization Header",
+            message: "No Authorization Header",
         }));
     }
 }

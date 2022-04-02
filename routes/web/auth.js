@@ -16,10 +16,7 @@ router.post("/register", function (req, res, next) {
     controllerUsers.registerUser(req, res);
 });
 
-// Only the Routes below this middleware are affected by this.
-router.use(CheckRequestAuthed);
-
-router.get("/", function (req, res, next) {
+router.get("/", CheckRequestAuthed, function (req, res, next) {
     controllerUsers.isAuth(req, res);
 });
 
