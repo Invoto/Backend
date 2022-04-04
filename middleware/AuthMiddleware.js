@@ -11,7 +11,6 @@ function CheckRequestAuthed(req, res, next) {
 
     if (authHeader) {
         let authToken = authHeader.split(" ")[1];
-        console.log(authToken);
 
         if (authToken) {
             verifyToken(authToken, (user) => {
@@ -36,6 +35,30 @@ function CheckRequestAuthed(req, res, next) {
     }
 }
 
+function NonFailingCheckRequestAuthed(req, res, next) {
+    let authHeader = req.headers["authorization"];
+
+    if (authHeader) {
+        let authToken = authHeader.split(" ")[1];
+
+        if (authToken) {
+            verifyToken(authToken, (user) => {
+                req.user = user;
+                next();
+            }, (err) => {
+                next();
+            });
+        }
+        else {
+            next();
+        }
+    }
+    else {
+        next();
+    }
+}
+
 module.exports = {
     CheckRequestAuthed,
+    NonFailingCheckRequestAuthed,
 };
