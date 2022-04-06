@@ -8,6 +8,7 @@ module.exports = {
     },
     "production": {
         "dialect": "postgres",
+        "protocol": "postgres",
         "dialectOptions": {
             "ssl": {
                 require: true,
