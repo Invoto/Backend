@@ -34,13 +34,19 @@ async function syncDatabase() {
 
 async function populateInitialPlans() {
   let promisesConsumer = consumerPlans.map(async (consumerPlan) => {
-    await db["ConsumerPlan"].create(consumerPlan);
+    await db["ConsumerPlan"].findOrCreate({
+      where: consumerPlan,
+      defaults: consumerPlan,
+    });
   });
 
   const resultsConsumer = await Promise.all(promisesConsumer);
 
   let promisesDeveloper = developerPlans.map(async (developerPlan) => {
-    await db["DeveloperPlan"].create(developerPlan);
+    await db["DeveloperPlan"].findOrCreate({
+      where: developerPlan,
+      defaults: developerPlan,
+    });
   });
 
   const resultsDeveloper = await Promise.all(promisesDeveloper);
