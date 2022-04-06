@@ -40,7 +40,6 @@ async function tryNow(req, res) {
                     data: form,
                     validateStatus: () => true,
                 }).then((resExtractor) => {
-                    console.log(resExtractor.data);
                     if (resExtractor.data.status) {
                         Extraction.create({
                             usageType: "TRYNOW",
