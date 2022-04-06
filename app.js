@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 require('dotenv').config();
 var express = require('express');
+var fs = require("fs");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -17,6 +18,11 @@ if (!process.env["INVOTO_DATABASE_SYNC"] || process.env["INVOTO_DATABASE_SYNC"] 
 if (!process.env["INVOTO_POPULATE_DATA"] || process.env["INVOTO_POPULATE_DATA"] == 1) {
   db.populateInitialPlans();
 }
+
+// Create Uploads Directory.
+try {
+  fs.mkdirSync(path.join(__dirname, '/uploads/'));
+} catch (err) { }
 
 var app = express();
 
