@@ -8,5 +8,9 @@ module.exports = {
     },
     "production": {
         "dialect": "postgres",
+        "dialect": "postgres",
+        "dialectOptions": {
+            "ssl": true
+        },
     }
 };

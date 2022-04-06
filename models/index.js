@@ -8,9 +8,7 @@ const configDB = require("../config/db");
 const { consumerPlans, developerPlans } = require("../config/plans");
 const db = {};
 
-let sequelize = new Sequelize(process.env["DATABASE_URL"], {
-  dialect: configDB[process.env["NODE_ENV"]]["dialect"]
-});
+let sequelize = new Sequelize(process.env["DATABASE_URL"], configDB[process.env["NODE_ENV"]]);
 
 fs
   .readdirSync(__dirname)
