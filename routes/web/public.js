@@ -2,17 +2,18 @@ var express = require('express');
 var router = express.Router();
 
 const controllerExtraction = require("../../controllers/ExtractionController");
+const controllerVolunteer = require("../../controllers/VolunteerController");
 
-const { Paths } = require("../../config/uploads");
-const multer = require("multer");
-
-const uploadTryNow = multer({
-    dest: Paths.UPLOAD_PATH_TEMP,
-});
+const { uploader } = require("../../config/uploads");
 
 // Route for Try-It-Now
-router.post("/try", uploadTryNow.single("imageFile"), function (req, res, next) {
+router.post("/try", uploader.single("imageFile"), function (req, res, next) {
     controllerExtraction.tryNow(req, res);
+});
+
+// Route for Volunteer
+router.post("/volunteer", uploader.single("imageFile"), function (req, res, next) {
+    controllerVolunteer.publicVolunteer(req, res);
 });
 
 module.exports = router;

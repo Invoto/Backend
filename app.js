@@ -12,6 +12,9 @@ var indexRouter = require('./routes/index');
 // Start Procedures.
 if (!process.env["INVOTO_DATABASE_SYNC"] || process.env["INVOTO_DATABASE_SYNC"] == 1) {
   db.sync();
+}
+
+if (!process.env["INVOTO_POPULATE_DATA"] || process.env["INVOTO_POPULATE_DATA"] == 1) {
   db.populateInitialPlans();
 }
 
