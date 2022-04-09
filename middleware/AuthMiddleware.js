@@ -11,9 +11,27 @@ function CheckRequestAuthed(req, res, next) {
         let authToken = authHeader.split(" ")[1];
 
         if (authToken) {
-            verifyToken(authToken, (user) => {
-                req.user = user;
-                next();
+            verifyToken(authToken, (tokenUser) => {
+                db.User.findOne({
+                    where: {
+                        id: tokenUser.id,
+                        email: tokenUser.email,
+                    },
+                }).then((user) => {
+                    if (user) {
+                        req.user = user;
+                        next();
+                    }
+                    else {
+                        res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                            message: "Invalid Token/User has been removed.",
+                        }));
+                    }
+                }).catch((error) => {
+                    res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                        message: error.message,
+                    }));
+                });
             }, (err) => {
                 res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
                     message: "Unauthorized",

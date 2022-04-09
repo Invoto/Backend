@@ -102,7 +102,6 @@ async function fetchJob(req, res) {
                 },
                 include: [{
                     model: db.User,
-                    as: db.User.tableName,
                 }],
             }).then(processExtraction).catch((error) => {
                 res.json(getFailureResponse({

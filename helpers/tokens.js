@@ -9,9 +9,9 @@ function generateTokenForUser(user) {
 }
 
 function verifyToken(token, onSuccess, onFailure) {
-    jwt.verify(token, process.env.INVOTO_TOKEN_SECRET, (err, user) => {
+    jwt.verify(token, process.env.INVOTO_TOKEN_SECRET, (err, tokenUser) => {
         if (!err) {
-            onSuccess(user);
+            onSuccess(tokenUser);
         }
         else {
             onFailure(err);
