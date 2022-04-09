@@ -26,11 +26,13 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
-async function syncDatabase() {
-  await sequelize.sync({ alter: true });
+async function syncDatabase(onComplete) {
+  sequelize.sync({
+    alter: true,
+  }).then(onComplete);
 }
 
-async function populateInitialPlans() {
+function populateInitialPlans(onComplete) {
   let promisesConsumer = consumerPlans.map(async (consumerPlan) => {
     await db["ConsumerPlan"].findOrCreate({
       where: consumerPlan,
@@ -38,16 +40,16 @@ async function populateInitialPlans() {
     });
   });
 
-  const resultsConsumer = await Promise.all(promisesConsumer);
-
-  let promisesDeveloper = developerPlans.map(async (developerPlan) => {
-    await db["DeveloperPlan"].findOrCreate({
-      where: developerPlan,
-      defaults: developerPlan,
+  Promise.all(promisesConsumer).then(() => {
+    let promisesDeveloper = developerPlans.map(async (developerPlan) => {
+      await db["DeveloperPlan"].findOrCreate({
+        where: developerPlan,
+        defaults: developerPlan,
+      });
     });
-  });
 
-  const resultsDeveloper = await Promise.all(promisesDeveloper);
+    Promise.all(promisesDeveloper).then(onComplete);
+  });
 }
 
 db.sequelize = sequelize;

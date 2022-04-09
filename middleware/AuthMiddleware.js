@@ -2,9 +2,7 @@ const { ResponseStatusCodes } = require("../consts/responses");
 const { getFailureResponse } = require("../helpers/responses");
 const { verifyToken } = require("../helpers/tokens");
 
-const { DataTypes } = require("sequelize");
 const db = require("../models");
-const User = require("../models/User")(db.sequelize, DataTypes);
 
 function CheckRequestAuthed(req, res, next) {
     let authHeader = req.headers["authorization"];

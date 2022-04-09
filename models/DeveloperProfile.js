@@ -25,12 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 
     /* Relationships */
     DeveloperProfile.associate = function (models) {
-        DeveloperProfile.belongsTo(models.User, {
-            // Mandatory to have a User Profile.
-            foreignKey: {
-                allowNull: false,
-            }
-        });
+        DeveloperProfile.hasOne(models.User);
         DeveloperProfile.belongsTo(models.DeveloperPlan, {
             // Mandatory to have a Developer Plan.
             foreignKey: {

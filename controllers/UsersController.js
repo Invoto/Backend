@@ -8,7 +8,6 @@ const { sendEmail } = require("../helpers/emails");
 
 const { DataTypes } = require("sequelize");
 const db = require("../models");
-const User = require("../models/User")(db.sequelize, DataTypes);
 
 async function isAuth(req, res) {
     res.json(getSuccessResponse({}));
@@ -20,7 +19,7 @@ async function loginUser(req, res) {
 
     let validationResponse = isLoginDataValid(email, password);
     if (validationResponse[0]) {
-        const users = await User.findAll({
+        const users = await db.User.findAll({
             where: {
                 email: email,
             },
@@ -57,7 +56,7 @@ async function forgotPassword(req, res) {
 
     let validationResponse = isForgotValid(email);
     if (validationResponse[0]) {
-        const users = await User.findAll({
+        const users = await db.User.findAll({
             where: {
                 email: email,
             },
@@ -104,14 +103,14 @@ async function registerUser(req, res) {
 
     let validationResponse = isRegisterDataValid(name, email, password, passwordRepeat);
     if (validationResponse[0]) {
-        const existingUserCount = await User.count({
+        const existingUserCount = await db.User.count({
             where: {
                 email: email,
             },
         });
 
         if (existingUserCount == 0) {
-            await User.create({
+            db.User.create({
                 email: email,
                 password: password,
                 fullName: name,
@@ -121,9 +120,18 @@ async function registerUser(req, res) {
                 developerProfile: {
                     usedQuota: 0,
                 }
+            }, {
+                include: [
+                    db.ConsumerProfile,
+                    db.DeveloperProfile,
+                ]
+            }).then((user) => {
+                res.json(getSuccessResponse({}));
+            }).catch((error) => {
+                res.json(getFailureResponse({
+                    message: error.message,
+                }));
             });
-
-            res.json(getSuccessResponse({}));
         }
         else {
             res.status(ResponseStatusCodes.RESOURCE_EXISTS).json(getFailureResponse({

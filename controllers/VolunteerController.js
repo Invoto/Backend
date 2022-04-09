@@ -3,9 +3,7 @@ const { ConfigVolunteer } = require("../config/uploads");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
 
-const { DataTypes, Op } = require("sequelize");
 const db = require("../models");
-const VolunteeredDocument = require("../models/VolunteeredDocument")(db.sequelize, DataTypes);
 
 function publicVolunteer(req, res) {
     let imageFile = req.file;
@@ -18,7 +16,7 @@ function publicVolunteer(req, res) {
     else {
         uploadFileToStorage(imageFile, (data) => {
             let imageFileURL = getBucketURL(imageFile);
-            VolunteeredDocument.create({
+            db.VolunteeredDocument.create({
                 imageURL: imageFileURL,
                 isValidated: false,
             }).then((volDoc) => {

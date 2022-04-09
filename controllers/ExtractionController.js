@@ -6,10 +6,7 @@ const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
 const { isFetchDataValid } = require("../helpers/validators/extractions");
 
-const { DataTypes, Op } = require("sequelize");
 const db = require("../models");
-const Extraction = require("../models/Extraction")(db.sequelize, DataTypes);
-const User = require("../models/User")(db.sequelize, DataTypes);
 
 async function tryNow(req, res) {
     let imageFile = req.file;
@@ -41,7 +38,7 @@ async function tryNow(req, res) {
                     validateStatus: () => true,
                 }).then((resExtractor) => {
                     if (resExtractor.data.status) {
-                        Extraction.create({
+                        db.xtraction.create({
                             usageType: "TRYNOW",
                             extractorJobID: resExtractor.data.job_id,
                         }).then((extraction) => {
@@ -74,19 +71,19 @@ async function fetchJob(req, res) {
         var extraction;
 
         if (user) {
-            extraction = await Extraction.findOne({
+            extraction = await db.Extraction.findOne({
                 where: {
                     id: extractionID,
                     "Users.id": user.id,
                 },
                 include: [{
-                    model: User,
-                    as: User.tableName,
+                    model: db.User,
+                    as: db.User.tableName,
                 }],
             });
         }
         else {
-            extraction = await Extraction.findOne({
+            extraction = await db.Extraction.findOne({
                 where: {
                     id: extractionID
                 },

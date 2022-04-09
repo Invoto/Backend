@@ -30,8 +30,16 @@ module.exports = (sequelize, DataTypes) => {
 
     /* Relationships */
     User.associate = function (models) {
-        User.hasOne(models.ConsumerProfile);
-        User.hasOne(models.DeveloperProfile);
+        User.belongsTo(models.ConsumerProfile, {
+            foreignKey: {
+                allowNull: false,
+            }
+        });
+        User.belongsTo(models.DeveloperProfile, {
+            foreignKey: {
+                allowNull: false,
+            }
+        });
         User.hasMany(models.Extraction);
         User.hasMany(models.VolunteeredDocument);
     };

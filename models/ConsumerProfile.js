@@ -18,12 +18,7 @@ module.exports = (sequelize, DataTypes) => {
 
     /* Relationships */
     ConsumerProfile.associate = function (models) {
-        ConsumerProfile.belongsTo(models.User, {
-            // Mandatory to have a User Profile.
-            foreignKey: {
-                allowNull: false,
-            }
-        });
+        ConsumerProfile.hasOne(models.User);
         ConsumerProfile.belongsTo(models.ConsumerPlan, {
             // Mandatory to have a Consumer Plan.
             foreignKey: {
