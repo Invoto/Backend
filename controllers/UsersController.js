@@ -120,23 +120,66 @@ async function registerUser(req, res) {
             },
         }).then((existingUserCount) => {
             if (existingUserCount == 0) {
-                db.User.create({
-                    email: email,
-                    password: password,
-                    fullName: name,
-                    consumerProfile: {
-                        usedQuota: 0,
-                    },
-                    developerProfile: {
-                        usedQuota: 0,
+                // Until plans are introduced to user accounts, we will use the default plan with unlimited quota.
+                db.ConsumerPlan.findOne({
+                    where: {
+                        quota: -1,
                     }
-                }, {
-                    include: [
-                        db.ConsumerProfile,
-                        db.DeveloperProfile,
-                    ]
-                }).then((user) => {
-                    res.json(getSuccessResponse({}));
+                }).then((consumerPlan) => {
+                    if (consumerPlan) {
+                        db.DeveloperPlan.findOne({
+                            where: {
+                                quota: -1,
+                            }
+                        }).then((developerPlan) => {
+                            if (developerPlan) {
+                                db.User.create({
+                                    email: email,
+                                    password: password,
+                                    fullName: name,
+                                    ConsumerProfile: {
+                                        usedQuota: 0,
+                                        ConsumerPlanId: consumerPlan.id,
+                                    },
+                                    DeveloperProfile: {
+                                        usedQuota: 0,
+                                        DeveloperPlanId: developerPlan.id,
+                                    }
+                                }, {
+                                    include: [
+                                        {
+                                            model: db.ConsumerProfile,
+                                            include: [db.ConsumerPlan],
+                                        },
+                                        {
+                                            model: db.DeveloperProfile,
+                                            include: [db.DeveloperPlan],
+                                        },
+                                    ]
+                                }).then((user) => {
+                                    res.json(getSuccessResponse({}));
+                                }).catch((error) => {
+                                    res.json(getFailureResponse({
+                                        message: error.message,
+                                    }));
+                                });
+                            }
+                            else {
+                                res.json(getFailureResponse({
+                                    message: "Developer Plan not found.",
+                                }));
+                            }
+                        }).catch((error) => {
+                            res.json(getFailureResponse({
+                                message: error.message,
+                            }));
+                        });
+                    }
+                    else {
+                        res.json(getFailureResponse({
+                            message: "Consumer Plan not found.",
+                        }));
+                    }
                 }).catch((error) => {
                     res.json(getFailureResponse({
                         message: error.message,
@@ -161,9 +204,16 @@ async function registerUser(req, res) {
     }
 }
 
+async function getUserAccount(req, res) {
+    let user = req.user;
+
+    res.json(getSuccessResponse(user.toJSON()));
+}
+
 module.exports = {
     isAuth,
     loginUser,
     forgotPassword,
     registerUser,
+    getUserAccount,
 };

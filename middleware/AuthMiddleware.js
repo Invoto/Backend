@@ -17,6 +17,16 @@ function CheckRequestAuthed(req, res, next) {
                         id: tokenUser.id,
                         email: tokenUser.email,
                     },
+                    include: [
+                        {
+                            model: db.ConsumerProfile,
+                            include: [db.ConsumerPlan],
+                        },
+                        {
+                            model: db.DeveloperProfile,
+                            include: [db.DeveloperPlan],
+                        },
+                    ]
                 }).then((user) => {
                     if (user) {
                         req.user = user;
@@ -28,6 +38,7 @@ function CheckRequestAuthed(req, res, next) {
                         }));
                     }
                 }).catch((error) => {
+                    console.log(error);
                     res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
                         message: error.message,
                     }));

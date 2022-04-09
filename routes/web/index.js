@@ -4,10 +4,12 @@ var router = express.Router();
 const routerAuth = require("./auth");
 const routerPublic = require("./public");
 const routerExtractions = require("./extractions");
+const routerUser = require("./user");
 
 router.use("/auth", routerAuth);
 router.use("/public", routerPublic);
 router.use("/extractions", routerExtractions);
+router.use("/user", routerUser);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
