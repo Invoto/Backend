@@ -9,13 +9,26 @@ var logger = require('morgan');
 var db = require("./models");
 var app = express();
 
+const { createMailingListIfNotExist } = require("./helpers/emails");
+
 function initApp() {
   var indexRouter = require('./routes/index');
+
+  /*
+   * Setup Procedures.
+   */
+
+  // Create the mailing list for subscribers if not exist.
+  createMailingListIfNotExist();
 
   // Create Uploads Directory.
   try {
     fs.mkdirSync(path.join(__dirname, '/uploads/'));
   } catch (err) { }
+
+  /*
+   * End of Setup Procedures.
+   */
 
   // view engine setup
   app.set('views', path.join(__dirname, 'views'));
