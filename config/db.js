@@ -7,13 +7,6 @@ module.exports = {
         "dialect": "mysql",
     },
     "production": {
-        "dialect": "postgres",
-        "protocol": "postgres",
-        "dialectOptions": {
-            "ssl": {
-                require: true,
-                rejectUnauthorized: false,
-            },
-        },
+        "dialect": "mysql",
     }
 };
