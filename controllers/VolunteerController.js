@@ -21,6 +21,10 @@ function publicVolunteer(req, res) {
                 isValidated: false,
             }).then((volDoc) => {
                 res.json(getSuccessResponse(volDoc.get({ plain: true })));
+            }).catch((error) => {
+                res.json(getFailureResponse({
+                    message: error.message,
+                }));
             });
         }, (error) => {
             res.json(getFailureResponse({

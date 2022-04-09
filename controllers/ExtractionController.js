@@ -38,7 +38,7 @@ async function tryNow(req, res) {
                     validateStatus: () => true,
                 }).then((resExtractor) => {
                     if (resExtractor.data.status) {
-                        db.xtraction.create({
+                        db.Extraction.create({
                             usageType: "TRYNOW",
                             extractorJobID: resExtractor.data.job_id,
                         }).then((extraction) => {
@@ -68,10 +68,34 @@ async function fetchJob(req, res) {
     let validationResponse = isFetchDataValid(extractionID);
     if (validationResponse[0]) {
         let user = req.user;
-        var extraction;
+
+        let processExtraction = (extraction) => {
+            if (extraction) {
+                axios({
+                    method: "GET",
+                    baseURL: process.env.INVOTO_EXTRACTOR_URL,
+                    url: `/jobs/${extraction.extractorJobID}`,
+                    validateStatus: () => true,
+                }).then((responseExtractor) => {
+                    res.json(getSuccessResponse({
+                        job_status: responseExtractor.data.status,
+                        outputs: responseExtractor.data.outputs,
+                    }));
+                }).catch((error) => {
+                    res.json(getFailureResponse({
+                        message: error.message
+                    }));
+                });
+            }
+            else {
+                res.json(getFailureResponse({
+                    message: "No such extraction found.",
+                }));
+            }
+        };
 
         if (user) {
-            extraction = await db.Extraction.findOne({
+            db.Extraction.findOne({
                 where: {
                     id: extractionID,
                     "Users.id": user.id,
@@ -80,37 +104,22 @@ async function fetchJob(req, res) {
                     model: db.User,
                     as: db.User.tableName,
                 }],
-            });
-        }
-        else {
-            extraction = await db.Extraction.findOne({
-                where: {
-                    id: extractionID
-                },
-            });
-        }
-
-        if (extraction) {
-            axios({
-                method: "GET",
-                baseURL: process.env.INVOTO_EXTRACTOR_URL,
-                url: `/jobs/${extraction.extractorJobID}`,
-                validateStatus: () => true,
-            }).then((responseExtractor) => {
-                res.json(getSuccessResponse({
-                    job_status: responseExtractor.data.status,
-                    outputs: responseExtractor.data.outputs,
-                }));
-            }).catch((error) => {
+            }).then(processExtraction).catch((error) => {
                 res.json(getFailureResponse({
                     message: error.message
                 }));
             });
         }
         else {
-            res.json(getFailureResponse({
-                message: "No such extraction found.",
-            }));
+            db.Extraction.findOne({
+                where: {
+                    id: extractionID
+                },
+            }).then(processExtraction).catch((error) => {
+                res.json(getFailureResponse({
+                    message: error.message
+                }));
+            });
         }
     }
     else {
