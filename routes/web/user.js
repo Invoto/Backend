@@ -4,9 +4,7 @@ var router = express.Router();
 const { CheckRequestAuthed } = require("../../middleware/AuthMiddleware");
 const controllerUsers = require("../../controllers/UsersController");
 
-router.use(CheckRequestAuthed);
-
-router.get("/", function (req, res, next) {
+router.get("/", CheckRequestAuthed, function (req, res, next) {
     controllerUsers.getUserAccount(req, res);
 });
 

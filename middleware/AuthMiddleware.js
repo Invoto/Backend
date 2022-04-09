@@ -38,7 +38,6 @@ function CheckRequestAuthed(req, res, next) {
                         }));
                     }
                 }).catch((error) => {
-                    console.log(error);
                     res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
                         message: error.message,
                     }));
