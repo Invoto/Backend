@@ -68,9 +68,33 @@ function NonFailingCheckRequestAuthed(req, res, next) {
         let authToken = authHeader.split(" ")[1];
 
         if (authToken) {
-            verifyToken(authToken, (user) => {
-                req.user = user;
-                next();
+            verifyToken(authToken, (tokenUser) => {
+                db.User.findOne({
+                    where: {
+                        id: tokenUser.id,
+                        email: tokenUser.email,
+                    },
+                    include: [
+                        {
+                            model: db.ConsumerProfile,
+                            include: [db.ConsumerPlan],
+                        },
+                        {
+                            model: db.DeveloperProfile,
+                            include: [db.DeveloperPlan],
+                        },
+                    ]
+                }).then((user) => {
+                    if (user) {
+                        req.user = user;
+                        next();
+                    }
+                    else {
+                        next();
+                    }
+                }).catch((error) => {
+                    next();
+                });
             }, (err) => {
                 next();
             });

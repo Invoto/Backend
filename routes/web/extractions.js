@@ -4,8 +4,8 @@ var router = express.Router();
 const { NonFailingCheckRequestAuthed } = require("../../middleware/AuthMiddleware");
 const controllerExtraction = require("../../controllers/ExtractionController");
 
-router.get("/:id", NonFailingCheckRequestAuthed, function (req, res, next) {
-    controllerExtraction.fetchJob(req, res);
+router.get("/:id?", NonFailingCheckRequestAuthed, function (req, res, next) {
+    controllerExtraction.getUserExtractions(req, res);
 });
 
 module.exports = router;

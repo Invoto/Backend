@@ -5,8 +5,10 @@ const { ConfigTryNow } = require("../config/uploads");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
 const { isFetchDataValid } = require("../helpers/validators/extractions");
+const { Op } = require("sequelize");
 
 const db = require("../models");
+const e = require('express');
 
 async function tryNow(req, res) {
     let imageFile = req.file;
@@ -78,7 +80,7 @@ async function tryNow(req, res) {
 }
 
 async function fetchJob(req, res) {
-    let extractionID = req.params.id;
+    let extractionID = req.query.id;
 
     let validationResponse = isFetchDataValid(extractionID);
     if (validationResponse[0]) {
@@ -143,7 +145,106 @@ async function fetchJob(req, res) {
     }
 }
 
+function getUserExtractions(req, res) {
+    var filterQuery = {};
+    let user = req.user;
+    if (user) {
+        filterQuery.userId = user.id;
+    }
+    else {
+        filterQuery.userId = null; // This assures only public extractions are fetched when it is requested from public endpoint.
+    }
+
+    let extractionId = req.params.id;
+    if (extractionId) {
+        filterQuery.id = extractionId;
+    }
+
+    let usageType = req.query.usageType;
+    if (usageType) {
+        filterQuery.usageType = usageType;
+    }
+    else {
+        filterQuery[Op.or] = [
+            { usageType: "CONSUMER" },
+            { usageType: "DEVELOPER" },
+        ];
+
+        if (!user) {
+            filterQuery[Op.or].push({ usageType: "TRYNOW" });
+        }
+    }
+
+    let shouldIncludeOutputs = req.query.reqOutputs;
+
+    const getOutputExtractions = (extractions) => {
+        return extractions.map((extraction) => {
+            delete extraction.dataValues["extractorJobID"];
+            return extraction;
+        });
+    }
+
+    const includeExtractions = (extractions, idx) => {
+        const processExtractorResponse = (extractions, idx, jobStatus, outputs, error) => {
+            extractions[idx].dataValues.jobStatus = jobStatus;
+            extractions[idx].dataValues.outputs = outputs;
+
+            if (error) {
+                extractions[idx].dataValues.outputError = error.message;
+            }
+
+            if (idx == extractions.length - 1) {
+                res.json(getSuccessResponse({
+                    extractions: getOutputExtractions(extractions),
+                }));
+            }
+            else {
+                includeExtractions(extractions, idx + 1);
+            }
+        };
+
+        let extraction = extractions[idx];
+
+        axios({
+            method: "GET",
+            baseURL: process.env.INVOTO_EXTRACTOR_URL,
+            url: `/jobs/${extraction.extractorJobID}`,
+            validateStatus: () => true,
+        }).then((responseExtractor) => {
+            processExtractorResponse(extractions, idx, responseExtractor.data.status, responseExtractor.data.outputs, null);
+        }).catch((error) => {
+            processExtractorResponse(extractions, idx, null, [], error);
+        });
+    };
+
+    db.Extraction.findAll({
+        where: filterQuery,
+        attributes: { exclude: ["UserId"] },
+    }).then((extractions) => {
+        if (extractions) {
+            if (shouldIncludeOutputs) {
+                includeExtractions(extractions, 0);
+            }
+            else {
+                res.json(getSuccessResponse({
+                    extractions: getOutputExtractions(extractions),
+                }));
+            }
+        }
+        else {
+            res.json(getSuccessResponse({
+                extractions: [],
+            }));
+        }
+    }).catch((error) => {
+        res.json(getFailureResponse({
+            message: error.message,
+        }));
+    });
+}
+
 module.exports = {
     tryNow,
     fetchJob,
+    getUserExtractions,
 };
