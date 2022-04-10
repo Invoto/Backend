@@ -27,6 +27,17 @@ async function tryNow(req, res) {
                 const form = new FormData();
                 form.append("invoice_file", imageFileData, imageFile.originalname);
 
+                const removeTempInvoiceFile = (filePath) => {
+                    fs.unlink(filePath, (err) => {
+                        if (!err) {
+                            console.log("Successfully removed: " + filePath);
+                        }
+                        else {
+                            console.log("Failed to remove temp file. Error: " + err.message);
+                        }
+                    });
+                };
+
                 axios({
                     method: "POST",
                     baseURL: process.env.INVOTO_EXTRACTOR_URL,
@@ -52,10 +63,14 @@ async function tryNow(req, res) {
                             message: "Internal Server Error",
                         }));
                     }
+
+                    removeTempInvoiceFile(imageFile.path);
                 }).catch((error) => {
                     res.json(getFailureResponse({
                         message: error.message,
                     }));
+
+                    removeTempInvoiceFile(imageFile.path);
                 });
             }
         });

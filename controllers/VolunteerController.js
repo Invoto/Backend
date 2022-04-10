@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { uploadFileToStorage, getBucketURL } = require("../helpers/storage");
 const { ConfigVolunteer } = require("../config/uploads");
 const { ResponseStatusCodes } = require("../consts/responses");
@@ -14,6 +15,17 @@ function publicVolunteer(req, res) {
         }));
     }
     else {
+        const removeTempInvoiceFile = (filePath) => {
+            fs.unlink(filePath, (err) => {
+                if (!err) {
+                    console.log("Successfully removed: " + filePath);
+                }
+                else {
+                    console.log("Failed to remove temp file. Error: " + err.message);
+                }
+            });
+        };
+
         uploadFileToStorage(imageFile, (data) => {
             let imageFileURL = getBucketURL(imageFile);
             db.VolunteeredDocument.create({
@@ -21,15 +33,21 @@ function publicVolunteer(req, res) {
                 isValidated: false,
             }).then((volDoc) => {
                 res.json(getSuccessResponse(volDoc.get({ plain: true })));
+
+                removeTempInvoiceFile(imageFile.path);
             }).catch((error) => {
                 res.json(getFailureResponse({
                     message: error.message,
                 }));
+
+                removeTempInvoiceFile(imageFile.path);
             });
         }, (error) => {
             res.json(getFailureResponse({
                 message: error.message,
             }));
+
+            removeTempInvoiceFile(imageFile.path);
         });
     }
 }
