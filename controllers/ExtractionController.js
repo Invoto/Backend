@@ -221,7 +221,7 @@ function getUserExtractions(req, res) {
         where: filterQuery,
         attributes: { exclude: ["UserId"] },
     }).then((extractions) => {
-        if (extractions) {
+        if (extractions.length > 0) {
             if (shouldIncludeOutputs) {
                 includeExtractions(extractions, 0);
             }
