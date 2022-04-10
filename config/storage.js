@@ -1,12 +1,18 @@
 const { S3Client } = require("@aws-sdk/client-s3");
 
 const BucketPaths = {
+    Extraction: {
+        Public: "extraction/public"
+    },
     Volunteer: {
         Public: "volunteer/public",
     },
 };
 
 const BucketURLS = {
+    Extraction: {
+        Public: "https://" + process.env.INVOTO_DO_SPACES_BUCKET + "." + process.env.INVOTO_DO_SPACES_REGION + ".cdn.digitaloceanspaces.com/" + BucketPaths.Extraction.Public,
+    },
     Volunteer: {
         Public: "https://" + process.env.INVOTO_DO_SPACES_BUCKET + "." + process.env.INVOTO_DO_SPACES_REGION + ".cdn.digitaloceanspaces.com/" + BucketPaths.Volunteer.Public,
     }

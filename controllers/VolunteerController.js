@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { uploadFileToStorage, getBucketURL } = require("../helpers/storage");
+const { uploadFileToVolunteerStorage, getBucketVolunteerURL } = require("../helpers/storage");
 const { ConfigVolunteer } = require("../config/uploads");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
@@ -26,8 +26,8 @@ function publicVolunteer(req, res) {
             });
         };
 
-        uploadFileToStorage(imageFile, (data) => {
-            let imageFileURL = getBucketURL(imageFile);
+        uploadFileToVolunteerStorage(imageFile, (data) => {
+            let imageFileURL = getBucketVolunteerURL(imageFile);
             db.VolunteeredDocument.create({
                 imageURL: imageFileURL,
                 isValidated: false,

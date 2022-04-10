@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM("CONSUMER", "DEVELOPER", "TRYNOW"),
             allowNull: false,
         },
+        imageURL: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         extractorJobID: {
             type: DataTypes.STRING,
             allowNull: false,

@@ -2,6 +2,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios').default;
 const { ConfigExtract } = require("../config/uploads");
+const { uploadFileToExtractionStorage, getBucketExtractionURL } = require("../helpers/storage");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
 const { Op } = require("sequelize");
@@ -52,29 +53,45 @@ async function extract(req, res, next) {
                     validateStatus: () => true,
                 }).then((resExtractor) => {
                     if (resExtractor.data.status) {
-                        db.Extraction.create({
-                            usageType: usageType,
-                            extractorJobID: resExtractor.data.job_id,
-                            UserId: userId,
-                        }).then((extraction) => {
-                            res.json(getSuccessResponse({
-                                extraction_id: extraction.id,
-                            }));
+                        const createExtraction = (imageURL) => {
+                            db.Extraction.create({
+                                usageType: usageType,
+                                extractorJobID: resExtractor.data.job_id,
+                                imageURL: imageURL,
+                                UserId: userId,
+                            }).then((extraction) => {
+                                res.json(getSuccessResponse({
+                                    extraction_id: extraction.id,
+                                }));
 
-                            res.usedQuota = 1;
+                                res.usedQuota = 1;
 
-                            if (next) {
-                                next();
-                            }
+                                if (next) {
+                                    next();
+                                }
+                            }).catch((error) => {
+                                res.json(getFailureResponse({
+                                    message: error.message,
+                                }));
+                            });
+                        };
+
+                        uploadFileToExtractionStorage(imageFile, (data) => {
+                            let imageFileURL = getBucketExtractionURL(imageFile);
+                            createExtraction(imageFileURL);
+                            removeTempInvoiceFile(imageFile.path);
+                        }, (error) => {
+                            createExtraction(null);
+                            removeTempInvoiceFile(imageFile.path);
                         });
                     }
                     else {
                         res.json(getFailureResponse({
                             message: "Internal Server Error",
                         }));
-                    }
 
-                    removeTempInvoiceFile(imageFile.path);
+                        removeTempInvoiceFile(imageFile.path);
+                    }
                 }).catch((error) => {
                     res.json(getFailureResponse({
                         message: error.message,
