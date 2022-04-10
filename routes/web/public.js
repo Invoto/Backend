@@ -9,7 +9,8 @@ const { uploader } = require("../../config/uploads");
 
 // Route for Try-It-Now
 router.post("/try", uploader.single("imageFile"), function (req, res, next) {
-    controllerExtraction.tryNow(req, res);
+    req.usageType = "TRYNOW";
+    controllerExtraction.extract(req, res);
 });
 
 // Route for Volunteer

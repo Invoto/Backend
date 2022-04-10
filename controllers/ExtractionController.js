@@ -1,19 +1,20 @@
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios').default;
-const { ConfigTryNow } = require("../config/uploads");
+const { ConfigExtract } = require("../config/uploads");
 const { ResponseStatusCodes } = require("../consts/responses");
 const { getSuccessResponse, getFailureResponse } = require("../helpers/responses");
-const { isFetchDataValid } = require("../helpers/validators/extractions");
 const { Op } = require("sequelize");
 
 const db = require("../models");
-const e = require('express');
 
-async function tryNow(req, res) {
+async function extract(req, res, next) {
     let imageFile = req.file;
+    let user = req.user ? req.user : null;
+    let userId = user ? user.id : null;
+    let usageType = req.usageType;
 
-    if (!ConfigTryNow.ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+    if (!ConfigExtract.ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
         res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
             message: "Invalid File Format",
         }));
@@ -52,12 +53,19 @@ async function tryNow(req, res) {
                 }).then((resExtractor) => {
                     if (resExtractor.data.status) {
                         db.Extraction.create({
-                            usageType: "TRYNOW",
+                            usageType: usageType,
                             extractorJobID: resExtractor.data.job_id,
+                            UserId: userId,
                         }).then((extraction) => {
                             res.json(getSuccessResponse({
                                 extraction_id: extraction.id,
                             }));
+
+                            res.usedQuota = 1;
+
+                            if (next) {
+                                next();
+                            }
                         });
                     }
                     else {
@@ -76,72 +84,6 @@ async function tryNow(req, res) {
                 });
             }
         });
-    }
-}
-
-async function fetchJob(req, res) {
-    let extractionID = req.query.id;
-
-    let validationResponse = isFetchDataValid(extractionID);
-    if (validationResponse[0]) {
-        let user = req.user;
-
-        let processExtraction = (extraction) => {
-            if (extraction) {
-                axios({
-                    method: "GET",
-                    baseURL: process.env.INVOTO_EXTRACTOR_URL,
-                    url: `/jobs/${extraction.extractorJobID}`,
-                    validateStatus: () => true,
-                }).then((responseExtractor) => {
-                    res.json(getSuccessResponse({
-                        job_status: responseExtractor.data.status,
-                        outputs: responseExtractor.data.outputs,
-                    }));
-                }).catch((error) => {
-                    res.json(getFailureResponse({
-                        message: error.message
-                    }));
-                });
-            }
-            else {
-                res.json(getFailureResponse({
-                    message: "No such extraction found.",
-                }));
-            }
-        };
-
-        if (user) {
-            db.Extraction.findOne({
-                where: {
-                    id: extractionID,
-                    "Users.id": user.id,
-                },
-                include: [{
-                    model: db.User,
-                }],
-            }).then(processExtraction).catch((error) => {
-                res.json(getFailureResponse({
-                    message: error.message
-                }));
-            });
-        }
-        else {
-            db.Extraction.findOne({
-                where: {
-                    id: extractionID
-                },
-            }).then(processExtraction).catch((error) => {
-                res.json(getFailureResponse({
-                    message: error.message
-                }));
-            });
-        }
-    }
-    else {
-        res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
-            message: validationResponse[1],
-        }));
     }
 }
 
@@ -244,7 +186,6 @@ function getUserExtractions(req, res) {
 }
 
 module.exports = {
-    tryNow,
-    fetchJob,
+    extract,
     getUserExtractions,
 };

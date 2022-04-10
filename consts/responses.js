@@ -6,6 +6,8 @@ const ResponseStatusCodes = {
     NOT_FOUND: 404,
     NOT_ACCEPTABLE: 406,
     RESOURCE_EXISTS: 409,
+    TOO_MANY_REQUESTS: 422,
+    UNEXPECTED_ERROR: 500,
 }
 
 const ResponseStatusMessages = {

@@ -44,7 +44,7 @@ function CheckRequestAuthed(req, res, next) {
                 });
             }, (err) => {
                 res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
-                    message: "Unauthorized",
+                    message: err.message,
                 }));
             });
         }
@@ -108,7 +108,75 @@ function NonFailingCheckRequestAuthed(req, res, next) {
     }
 }
 
+function CheckAPIRequestAuthed(req, res, next) {
+    let authHeader = req.headers["authorization"];
+
+    if (authHeader) {
+        let apiKey = authHeader.split(" ")[1];
+
+        if (apiKey) {
+            db.DeveloperProfile.findOne({
+                where: {
+                    apiKey: apiKey,
+                },
+            }).then((developerProfile) => {
+                if (developerProfile) {
+                    db.User.findOne({
+                        where: {
+                            DeveloperProfileId: developerProfile.id,
+                        },
+                        include: [
+                            {
+                                model: db.ConsumerProfile,
+                                include: [db.ConsumerPlan],
+                            },
+                            {
+                                model: db.DeveloperProfile,
+                                include: [db.DeveloperPlan],
+                            },
+                        ]
+                    }).then((user) => {
+                        if (user) {
+                            req.user = user;
+                            next();
+                        }
+                        else {
+                            res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                                message: "Invalid API Key/User has been removed.",
+                            }));
+                        }
+                    }).catch((error) => {
+                        res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                            message: error.message,
+                        }));
+                    });
+                }
+                else {
+                    res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                        message: "Invalid API Key/User has been removed.",
+                    }));
+                }
+            }).catch((error) => {
+                res.status(ResponseStatusCodes.UNAUTHORIZED).send(getFailureResponse({
+                    message: error.message,
+                }));
+            });
+        }
+        else {
+            res.status(ResponseStatusCodes.NOT_ACCEPTABLE).send(getFailureResponse({
+                message: "Invalid Token",
+            }));
+        }
+    }
+    else {
+        res.status(ResponseStatusCodes.BAD_REQUEST).send(getFailureResponse({
+            message: "No Authorization Header",
+        }));
+    }
+}
+
 module.exports = {
     CheckRequestAuthed,
     NonFailingCheckRequestAuthed,
+    CheckAPIRequestAuthed,
 };

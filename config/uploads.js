@@ -16,7 +16,7 @@ const uploaderStorage = multer.diskStorage({
 
 const uploader = multer({ storage: uploaderStorage });
 
-const ConfigTryNow = {
+const ConfigExtract = {
     ALLOWED_FILE_TYPES: [
         "image/png",
         "image/jpeg"
@@ -32,6 +32,6 @@ const ConfigVolunteer = {
 
 module.exports = {
     uploader,
-    ConfigTryNow,
+    ConfigExtract,
     ConfigVolunteer,
 };
