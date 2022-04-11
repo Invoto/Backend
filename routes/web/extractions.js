@@ -4,7 +4,9 @@ var router = express.Router();
 const { CheckRequestAuthed } = require("../../middleware/AuthMiddleware");
 const controllerExtraction = require("../../controllers/ExtractionController");
 
-router.post("/", CheckRequestAuthed, function (req, res, next) {
+const { uploader } = require("../../config/uploads");
+
+router.post("/", CheckRequestAuthed, uploader.single("imageFile"), function (req, res, next) {
     req.usageType = "CONSUMER";
     controllerExtraction.extract(req, res);
 });
