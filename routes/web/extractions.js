@@ -1,10 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-const { NonFailingCheckRequestAuthed } = require("../../middleware/AuthMiddleware");
+const { CheckRequestAuthed } = require("../../middleware/AuthMiddleware");
 const controllerExtraction = require("../../controllers/ExtractionController");
 
-router.get("/:id?", NonFailingCheckRequestAuthed, function (req, res, next) {
+router.post("/", CheckRequestAuthed, function (req, res, next) {
+    req.usageType = "CONSUMER";
+    controllerExtraction.extract(req, res);
+});
+
+router.get("/:id?", CheckRequestAuthed, function (req, res, next) {
     controllerExtraction.getUserExtractions(req, res);
 });
 
