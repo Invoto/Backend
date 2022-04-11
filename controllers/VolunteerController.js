@@ -6,8 +6,10 @@ const { getSuccessResponse, getFailureResponse } = require("../helpers/responses
 
 const db = require("../models");
 
-function publicVolunteer(req, res) {
+function volunteer(req, res) {
     let imageFile = req.file;
+    let user = req.user ? req.user : null;
+    let userId = user ? user.id : null;
 
     if (!ConfigVolunteer.ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
         res.status(ResponseStatusCodes.BAD_REQUEST).json(getFailureResponse({
@@ -31,6 +33,7 @@ function publicVolunteer(req, res) {
             db.VolunteeredDocument.create({
                 imageURL: imageFileURL,
                 isValidated: false,
+                UserId: userId,
             }).then((volDoc) => {
                 res.json(getSuccessResponse(volDoc.get({ plain: true })));
 
@@ -52,6 +55,43 @@ function publicVolunteer(req, res) {
     }
 }
 
+function getVolunteeredDocuments(req, res) {
+    var filterQuery = {};
+    let user = req.user;
+    if (user) {
+        filterQuery.UserId = user.id;
+    }
+    else {
+        filterQuery.UserId = null; // This assures only public extractions are fetched when it is requested from public endpoint.
+    }
+
+    let volunteerId = req.params.id;
+    if (volunteerId) {
+        filterQuery.id = volunteerId;
+    }
+
+    db.VolunteeredDocument.findAll({
+        where: filterQuery,
+        attributes: { exclude: ["UserId"] },
+    }).then((vDocs) => {
+        if (vDocs.length > 0) {
+            res.json(getSuccessResponse({
+                volunteeredDocuments: vDocs,
+            }));
+        }
+        else {
+            res.json(getSuccessResponse({
+                volunteeredDocuments: [],
+            }));
+        }
+    }).catch((error) => {
+        res.json(getFailureResponse({
+            message: error.message,
+        }));
+    });
+}
+
 module.exports = {
-    publicVolunteer,
+    volunteer,
+    getVolunteeredDocuments,
 }

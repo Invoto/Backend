@@ -20,7 +20,7 @@ router.get("/try-monitor/:id", function (req, res, next) {
 
 // Route for Volunteer
 router.post("/volunteer", uploader.single("imageFile"), function (req, res, next) {
-    controllerVolunteer.publicVolunteer(req, res);
+    controllerVolunteer.volunteer(req, res);
 });
 
 // Route for Newsletter Subscriptions

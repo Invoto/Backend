@@ -108,10 +108,10 @@ function getUserExtractions(req, res) {
     var filterQuery = {};
     let user = req.user;
     if (user) {
-        filterQuery.userId = user.id;
+        filterQuery.UserId = user.id;
     }
     else {
-        filterQuery.userId = null; // This assures only public extractions are fetched when it is requested from public endpoint.
+        filterQuery.UserId = null; // This assures only public extractions are fetched when it is requested from public endpoint.
     }
 
     let extractionId = req.params.id;
