@@ -14,8 +14,8 @@ router.post("/try", uploader.single("imageFile"), function (req, res, next) {
 });
 
 // Router for monitoring the request after trying-it-now
-router.get("/try-monitor/:id", function (req, res, next) {
-    controllerExtraction.getUserExtractions(req, res);
+router.get("/try-monitor/:id?", function (req, res, next) {
+    controllerExtraction.getExtractions(req, res);
 });
 
 // Route for Volunteer

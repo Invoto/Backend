@@ -12,7 +12,7 @@ router.post("/", CheckRequestAuthed, uploader.single("imageFile"), function (req
 });
 
 router.get("/:id?", CheckRequestAuthed, function (req, res, next) {
-    controllerExtraction.getUserExtractions(req, res);
+    controllerExtraction.getExtractions(req, res);
 });
 
 module.exports = router;

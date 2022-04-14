@@ -104,7 +104,7 @@ async function extract(req, res, next) {
     }
 }
 
-function getUserExtractions(req, res) {
+function getExtractions(req, res) {
     var filterQuery = {};
     let user = req.user;
     if (user) {
@@ -204,5 +204,5 @@ function getUserExtractions(req, res) {
 
 module.exports = {
     extract,
-    getUserExtractions,
+    getExtractions,
 };
